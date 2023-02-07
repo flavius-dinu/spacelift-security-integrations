@@ -1,16 +1,31 @@
-provider "azurerm" {
-  features {}
+provider "aws" {
+  region = "eu-west-1"
 }
 
-resource "azurerm_resource_group" "this" {
-  for_each = local.rg_details
-  name     = each.key
-  location = each.value.location
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu*"]
+  }
 }
 
-resource "azurerm_network_security_group" "this" {
-  for_each            = local.nsg_details
-  name                = each.key
-  location            = azurerm_resource_group.this[each.value.rg_name].location
-  resource_group_name = azurerm_resource_group.this[each.value.rg_name].name
+locals {
+  instances = {
+    instance1 = {
+      ami           = data.aws_ami.ubuntu.id
+      instance_type = "t3.micro"
+    }
+    instance2 = {
+      ami           = data.aws_ami.ubuntu.id
+      instance_type = "t3.micro"
+    }
+  }
+}
+
+resource "aws_instance" "this" {
+  for_each      = local.instances
+  ami           = each.value.ami
+  instance_type = each.value.instance_type
 }
