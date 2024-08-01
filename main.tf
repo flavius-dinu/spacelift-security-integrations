@@ -29,3 +29,4 @@ resource "aws_instance" "this" {
   ami           = each.value.ami
   instance_type = each.value.instance_type
 }
+
